@@ -1,0 +1,177 @@
+.Dd 2023-Sep-21
+.Dt GCLI-ISSUES 1
+.Os gcli 2.0.0
+.Sh NAME
+.Nm gcli issues
+.Nd Manage issues in various git forges
+.Sh SYNOPSIS
+.Nm
+.Op Fl n Ar n
+.Op Fl a
+.Op Fl s
+.Op Fl A Ar author
+.Op Fl L Ar label
+.Op Fl o Ar owner Fl r Ar repo
+.Nm
+.Fl i Ar issue
+.Op Fl o Ar owner Fl r Ar repo
+.Ar actions...
+.Nm
+.Cm create
+.Op Fl o Ar owner Fl r Ar repo
+.Op Fl y
+.Sh DESCRIPTION
+Use
+.Nm
+to list, create, edit or delete issues in repositories in various
+.Xr git 1
+forges such as GitHub, GitLab and Gitea. Without any action specified,
+.Nm
+will list issues in the given or autodetected repository.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl s , -sorted
+Reverse the output such that most recent items appear at the bottom.
+.It Fl o , -owner Ar owner
+List issues in the repository of the given owner. This option can only
+be used in combination with
+.Fl r .
+.It Fl r , -repo Ar repo
+List issues in the given repository. This option can only be used in
+combination with
+.Fl o .
+.It Fl a
+List issues disregarding their state. This will list closed issues as
+well. Cannot be combined with actions. This does not affect the
+.Fl n
+option.
+.It Fl A , Fl -author Ar user
+Only list issues authored by the given user.
+.It Fl L , Fl -label Ar label
+Filter issues by the given label. This option may only be specfied once.
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+issues. Setting
+.Ar n
+to -1 will fetch all issues. Default: 30. Note that on large
+repositories fetching all issues can take a considerable amount of
+time and may result in rate limiting by the respective API. See
+.Sx CAVEATS .
+.It Fl i , -id Ar issue
+execute the given
+.Ar actions
+for the specified
+.Ar issue .
+.El
+.
+.Sh SUBCOMMANDS
+.Bl -tag -width indent
+.It Cm create
+Create a new issue in the given or autodetected repository. The
+editor will come up and ask you to enter an issue message.
+.Pp
+The following flags can be specified:
+.Bl -tag -width indent
+.It Fl i , -in Ar owner/repo
+Specify in which repository the issue is to be created.
+.It Fl y , -yes
+Do not ask for confirmation before creating the issue. Assume yes.
+.El
+.El
+.Sh ACTIONS
+.Ar actions...
+may be one or more of the following:
+.Bl -tag -width "labels [options]"
+.It Cm all
+Display both a summary and the original post of the issue.
+.It Cm comments
+Print a list of comments under the issue.
+.It Cm status
+Print a short summary of the issue.
+.It Cm op
+Print the original post of the issue.
+.It Cm close
+Close the issue.
+.It Cm reopen
+Reopen a closed issue.
+.It Cm assign Ar assignee
+Assign the issue to the given
+.Ar assignee
+(user name).
+.It Cm labels Op Ar options
+The following options can be specified more than once:
+.Bl -tag -width indent
+.It add Ar label
+Add the given label to the issue.
+.It remove Ar label
+Remove the given label from the issue.
+.El
+.It Cm milestone Ar id
+Assign the issue to a milestone with the given
+.Ar id .
+.It Cm milestone Fl d
+Clear associated milestone of the given issue.
+.It Cm notes
+Alias for the
+.Cm comments
+action that prints the list of comments associated with the issue.
+.El
+.Sh EXAMPLES
+Print a list of issues in the current project:
+.Bd -literal -offset indent
+$ gcli issues
+.Ed
+.Pp
+Report a new issue in the current project:
+.Bd -literal -offset indent
+$ gcli create issues "summary here"
+.Ed
+.Pp
+Print both a summary and comments of issue 1 in herrhotzenplotz/gcli:
+.Bd -literal -offset indent
+$ gcli issues -o herrhotzenplotz -r gcli -i 1 status comments
+.Ed
+.Pp
+Add the labels
+.Sq foo
+and
+.Sq bar
+to the issue with id 420:
+.Bd -literal -offset indent
+$ gcli issues -i420 labels add foo add bar
+.Ed
+.Pp
+List issues with the label
+.Dq bug :
+.Bd -literal -offset indent
+$ gcli issues -L bug
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
+.Sh CAVEATS
+GitHub and Gitea treat Pull Requests as Issues. Due to the semantics
+of
+.Nm
+those issues that are actually PRs are dropped from the output. In
+this case a note will be printed indicating how many issues were
+dropped. You can suppress this warning using the
+.Fl q
+program option.
+.Sh BUGS
+GitHub only supports removing labels from issues one by one. If you
+still want to remove multiple issues with a single gcli call, you may
+do something like:
+.
+.Bd -literal -offset indent
+$ gcli issues -i42 \\
+        labels remove bug \\
+        labels remove foo
+.Ed
+.Pp
+Please report bugs at https://gitlab.com/herrhotzenplotz/gcli/, via E-Mail to nsonack@herrhotzenplotz.de
+or on Github.

@@ -1,0 +1,219 @@
+.Dd 2023-Sep-21
+.Dt GCLI-PULLS 1
+.Os gcli 2.0.0
+.Sh NAME
+.Nm gcli pulls
+.Nd Manage Pull Requests on Git Forges
+.Sh SYNOPSIS
+.Nm
+.Op Fl a
+.Op Fl A Ar author
+.Op Fl L Ar label
+.Op Fl s
+.Op Fl n Ar n
+.Op Fl o Ar owner Fl r Ar repo
+.Nm
+.Fl i Ar pr
+.Op Fl o Ar owner Fl r Ar repo
+.Ar actions...
+.Nm
+.Cm create
+.Op Fl o Ar owner Fl r Ar repo
+.Op Fl t Ar branch
+.Op Fl f Ar owner:branch
+.Op Fl y
+.Ar "PR title..."
+.Sh DESCRIPTION
+Use
+.Nm
+to list, create, edit or delete Pull Requests (PRs) in repositories on
+various
+.Xr git 1
+forges such as GitLab, Gitea or GitHub. Without any action specified,
+.Nm
+will list open PRs in the given or autodetected repository.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl s , -sorted
+Reverse the output such that most recent items appear at the bottom.
+.It Fl o , -owner Ar owner
+List PRs in the repository of the given owner. This option can only
+be used in combination with
+.Fl r .
+.It Fl r , -repo Ar repo
+List PRs in the given repository. This option can only be used in
+combination with
+.Fl o .
+.It Fl A , -author Ar author
+Filter pull requests by the given author.
+.Pp
+Note that the implementation is somewhat limited on GitHub and Gitea
+since the respective API does not allow off-loading the filtering to
+its side. Due to this fact using this option may take an increased
+amount of time because
+.Nm
+needs to iterate all the fetched data and filter out the requested
+information.
+.It Fl L , -label Ar label
+Filter pull requests by the given label. See the notes about the
+.Fl A
+option above - the same reasoning applies to this option.
+.It Fl a
+List all PRs, including closed and merged ones. Cannot be combined
+with actions. This does not affect the
+.Fl n
+option.
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+pull requests. Default: 30. If
+.Ar n
+is set to -1 this will fetch all pull requests. Note that on large
+repositories fetching all pull requests can take a considerable amount
+of time and may result in rate limiting by the respective API.
+.It Fl i , -id Ar PR
+execute the given
+.Ar actions
+on the specified
+.Ar PR .
+.El
+.Pp
+.Sh SUBCOMMANDS
+.Bl -tag -width create
+.It Cm create
+Create a new PR in the given or autodetected repository. The editor
+will come up and ask you to enter the PR message.
+.Pp
+The following flags can be specified:
+.Bl -tag -width indent
+.It Fl o , -owner Ar owner
+Specify the owner of the repository where the PR is to be created.
+.It Fl r , -repo Ar repository
+Specify the name of the repository where the PR is to be created.
+.It Fl t , -to Ar branch
+The target (base) branch of the PR. This is the branch the commits are
+to be merged into. You may omit this flag if you have set pr.base in
+your .gcli config file.
+.It Fl f , -from Ar owner:branch
+The source (head) branch of the PR. This is the branch that contains
+the commits that are to be merged into the target repository. You may
+omit this flag and gcli will try to infer this information.
+.It Fl y , -yes
+Do not ask for confirmation before creating the PR. Assume yes.
+.It Ar "PR Title..."
+The title of the Pull Request or Merge Request.
+.El
+.El
+.Sh ACTIONS
+.Ar actions...
+may be one or more of the following:
+.Bl -tag -width comments
+.It Cm all
+Get all the relevant information about a PR. The following actions are
+implied:
+.Cm status ,
+.Cm op ,
+.Cm commits and
+.Cm ci .
+.It Cm commits
+Print the list of commits associated with the Pull Requests.
+.It Cm comments
+Print a list of comments under the PR.
+.It Cm status
+Print metadata of the commit such as the ID, head and base branch etc.
+.It Cm op
+Print the original post of the Pull Request.
+.It Cm ci
+Print a list of checks that ran on the PR (GitLab Pipelines and GitHub CI).
+.It Cm diff
+Print a diff of the changes attached to the PR. This can be piped into
+.Xr patch 1
+or
+.Xr git-apply 1 .
+.It Cm close
+Close the PR.
+.It Cm reopen
+Reopen a closed PR.
+.It Cm merge Op Ar options
+Merge the PR. The source branch is deleted by default unless you set the
+.Dq pr.inhibit-delete-source-branch
+option to yes in your
+.Pa .gcli
+file. You may supply the following options:
+.Bl -tag -width indent
+.It Fl -squash , s
+Squash the commits before merging.
+.It Fl -inhibit-delete , D
+Delete the source branch after merging.
+.El
+.It Cm milestone Ar milestone-id
+Assign the pull request to the given
+.Ar milestone-id .
+.It Cm milestone Fl d
+Clear a set milestone on the pull request.
+.It Cm notes
+Alias for the
+.Cm comments
+action that prints a list of comments associated with the PR.
+.It Cm labels Op Ar options
+The following options can be specified more than once:
+.Bl -tag -width indent
+.It add Ar label
+Add the given label to the pull request.
+.It remove Ar label
+Remove the given label from the pull request.
+.El
+.El
+.Sh EXAMPLES
+Print a list of open PRs in the current project:
+.Bd -literal -offset indent
+$ gcli pulls
+.Ed
+.Pp
+Create a new PR in the current Project, the head is the currently
+checked out branch of git. See
+.Xr git-status 1
+The base will be what pr.base in .gcli is set to.
+.Bd -literal -offset indent
+$ gcli pulls create "summary here"
+.Ed
+.Pp
+Print both a summary and comments of PR 11 in herrhotzenplotz/gcli:
+.Bd -literal -offset indent
+$ gcli pulls -o herrhotzenplotz -r gcli -i 11 all comments
+.Ed
+.Pp
+Merge PR 42 in the upstream repository:
+.Bd -literal -offset indent
+$ gcli pulls -i 42 merge
+.Ed
+.Pp
+Note that you could also pull the PR head and merge it manually into
+the base branch. Assuming trunk is the base branch:
+.Bd -literal -offset indent
+$ git fetch upstream pull/42/head:42-review
+$ git checkout 42-review
+$ <make etc>
+$ git checkout trunk
+$ git merge --no-ff 42-review
+.Ed
+.Pp
+List pull requests that have the
+.Dq bug
+label:
+.Bd -literal -offset indent
+$ gcli pulls -L bug
+.Ed
+.Pp
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr git-merge 1 ,
+.Xr git-branch 1 ,
+.Xr gcli 1 ,
+.Xr patch 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
+.Sh BUGS
+Please report bugs at https://gitlab.com/herrhotzenplotz/gcli/, via E-Mail to nsonack@herrhotzenplotz.de
+or on Github.
