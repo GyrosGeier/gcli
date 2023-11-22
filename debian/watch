@@ -1,0 +1,8 @@
+version=4
+
+# PGP signature mangle, so foo.tar.gz has foo.tar.gz.sig.
+#opts="pgpsigurlmangle=s%$%.sig%"
+
+opts="filenamemangle=s%(?:.*?)?(@ANY_VERSION@@ARCHIVE_EXT@)%@PACKAGE@-$1%" \
+    https://github.com/herrhotzenplotz/gcli/tags \
+    (?:.*?/)?@ANY_VERSION@@ARCHIVE_EXT@

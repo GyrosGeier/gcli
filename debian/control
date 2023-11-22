@@ -1,0 +1,28 @@
+Source: gcli
+Section: devel
+Priority: optional
+Maintainer: Simon Richter <sjr@debian.org>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13), pkg-config, flex, bison,
+ libcurl4-gnutls-dev
+Standards-Version: 4.6.2
+Homepage: https://herrhotzenplotz.de/gcli/
+Vcs-Browser: https://github.com/herrhotzenplotz/gcli
+Vcs-Git: https://github.com/herrhotzenplotz/gcli.git
+
+Package: gcli
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: Git Forge CLI
+ This is a command line tool to interact with various Git forges, such as
+ Gitea, GitLab and Microsoft® GitHub™.
+ .
+ Features include:
+  * Interacting with issues/bug reports
+  * Managing and commenting pull/merge requests
+  * Creating and altering repositories, including forks
+  * Inspecting and managing pipelines
+  * Tagging and publishing releases

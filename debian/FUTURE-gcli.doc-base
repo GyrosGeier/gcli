@@ -1,0 +1,8 @@
+Document: gcli
+Title: gcli Manual
+Author: Nico Sonack <nsonack@herrhotzenplotz.de>
+Abstract: Manual for gcli forge client
+Section: devel
+
+Format: text
+Files: /usr/share/doc/gcli/*.md

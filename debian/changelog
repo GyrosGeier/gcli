@@ -1,0 +1,5 @@
+gcli (2.0.0-1) unstable; urgency=medium
+
+  * Initial release.
+
+ -- Simon Richter <sjr@debian.org>  Wed, 22 Nov 2023 23:26:01 +0900
