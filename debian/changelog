@@ -1,3 +1,9 @@
+gcli (2.1.0-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Simon Richter <sjr@debian.org>  Sat, 16 Dec 2023 22:22:35 +0900
+
 gcli (2.0.0-2) unstable; urgency=medium
 
   * Backport 35a058d to avoid a segfault
