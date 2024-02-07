@@ -1,3 +1,9 @@
+gcli (2.2.0-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Simon Richter <sjr@debian.org>  Thu, 08 Feb 2024 03:32:45 +0900
+
 gcli (2.1.0-2) unstable; urgency=medium
 
   * Add patch to avoid segfault if service responds with 404
